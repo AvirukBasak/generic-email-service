@@ -1,4 +1,3 @@
-import { MultiSizeImageSz } from "@/types/dtoCore";
 import { LogType, QuerySortOrder } from "@/types";
 import z from "zod";
 
@@ -19,7 +18,6 @@ export const CommonZodSchemas = {
   },
 
   Enum: {
-    IMGSIZE: z.enum(MultiSizeImageSz),
     LOGTYPE: z.enum(LogType),
   },
 

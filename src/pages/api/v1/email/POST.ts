@@ -28,7 +28,7 @@ interface EmailFormData {
 
 // Helper to extract field values from formidable
 function getFieldValue(field: Nullable<string | string[]>): string {
-  if (!field) {
+  if (field == null) {
     throw CustomApiError.create(400, "Missing required field");
   }
   if (Array.isArray(field)) {
@@ -39,7 +39,7 @@ function getFieldValue(field: Nullable<string | string[]>): string {
 
 // Helper to extract array fields (for to, cc, bcc)
 function getArrayField(field: Nullable<string | string[]>): string[] {
-  if (!field) return [];
+  if (field == null) return [];
   if (Array.isArray(field)) {
     return field;
   }
@@ -47,8 +47,8 @@ function getArrayField(field: Nullable<string | string[]>): string[] {
 }
 
 // Helper to extract files array
-function getFilesArray(field: formidable.File | formidable.File[] | undefined): formidable.File[] {
-  if (!field) return [];
+function getFilesArray(field: Nullable<formidable.File | formidable.File[]>): formidable.File[] {
+  if (field == null) return [];
   if (Array.isArray(field)) {
     return field;
   }
@@ -61,32 +61,32 @@ function parseEmailFormData(parsedForm: FormParseResult): EmailFormData {
 
   // Extract and validate required fields
   const from = valueFields["from"];
-  if (!from || (Array.isArray(from) ? from.length === 0 : !from)) {
+  if (from == null || (Array.isArray(from) ? from.length === 0 : !from)) {
     throw CustomApiError.create(400, "Missing 'from' field");
   }
 
   const subject = valueFields["subject"];
-  if (!subject || (Array.isArray(subject) ? subject.length === 0 : !subject)) {
+  if (subject == null || (Array.isArray(subject) ? subject.length === 0 : !subject)) {
     throw CustomApiError.create(400, "Missing 'subject' field");
   }
 
   const body = valueFields["body"];
-  if (!body || (Array.isArray(body) ? body.length === 0 : !body)) {
+  if (body == null || (Array.isArray(body) ? body.length === 0 : !body)) {
     throw CustomApiError.create(400, "Missing 'body' field");
   }
 
   const emailHost = valueFields["emailHost"];
-  if (!emailHost || (Array.isArray(emailHost) ? emailHost.length === 0 : !emailHost)) {
+  if (emailHost == null || (Array.isArray(emailHost) ? emailHost.length === 0 : !emailHost)) {
     throw CustomApiError.create(400, "Missing 'emailHost' field");
   }
 
   const emailUser = valueFields["emailUser"];
-  if (!emailUser || (Array.isArray(emailUser) ? emailUser.length === 0 : !emailUser)) {
+  if (emailUser != null || (Array.isArray(emailUser) ? emailUser.length === 0 : !emailUser)) {
     throw CustomApiError.create(400, "Missing 'emailUser' field");
   }
 
   const emailPassword = valueFields["emailPassword"];
-  if (!emailPassword || (Array.isArray(emailPassword) ? emailPassword.length === 0 : !emailPassword)) {
+  if (emailPassword == null || (Array.isArray(emailPassword) ? emailPassword.length === 0 : !emailPassword)) {
     throw CustomApiError.create(400, "Missing 'emailPassword' field");
   }
 
@@ -111,7 +111,7 @@ function parseEmailFormData(parsedForm: FormParseResult): EmailFormData {
 
   // Validate attachment file paths
   for (const attachment of attachments) {
-    if (!attachment.filepath || attachment.filepath.length === 0 || !fs.existsSync(attachment.filepath)) {
+    if (attachment.filepath.length === 0 || attachment.filepath.length === 0 || !fs.existsSync(attachment.filepath)) {
       throw CustomApiError.create(500, "Invalid filepath for uploaded attachment");
     }
   }
@@ -172,38 +172,36 @@ async function sendEmail(data: EmailFormData): Promise<string> {
     // Clean up files even on error
     data.attachments.forEach((file) => {
       fs.unlink(file.filepath, (err) => {
-        if (err) console.error("Error deleting temp file:", err);
+        if (err != null) console.error("Error deleting temp file:", err);
       });
     });
   }
 }
 
-export default WithMiddleware(
-  async function POST(req: NextApiRequest, res: NextApiResponse) {
-    RequestValidationParser.parse({ req, method: HttpMethodTypes.POST });
+export default WithMiddleware(async function POST(req: NextApiRequest, res: NextApiResponse) {
+  RequestValidationParser.parse({ req, method: HttpMethodTypes.POST });
 
-    // Parse multipart form data
-    const form = formidable({ multiples: true, keepExtensions: true });
+  // Parse multipart form data
+  const form = formidable({ multiples: true, keepExtensions: true });
 
-    const parsedForm = await new Promise<FormParseResult>((resolve, reject) =>
-      form.parse(req, (err, valueFields, fileFields) => {
-        if (err == null) return resolve({ valueFields, fileFields });
-        return reject(CustomApiError.create(400, "Bad Request", err));
-      })
-    );
+  const parsedForm = await new Promise<FormParseResult>((resolve, reject) =>
+    form.parse(req, (err, valueFields, fileFields) => {
+      if (err == null) return resolve({ valueFields, fileFields });
+      return reject(CustomApiError.create(400, "Bad Request", err));
+    })
+  );
 
-    // Parse and validate email form data
-    const emailData = parseEmailFormData(parsedForm);
+  // Parse and validate email form data
+  const emailData = parseEmailFormData(parsedForm);
 
-    // Send email
-    const messageId = await sendEmail(emailData);
+  // Send email
+  const messageId = await sendEmail(emailData);
 
-    return respond(res, {
-      status: 200,
-      json: {
-        message: "Email sent successfully",
-        messageId,
-      },
-    });
-  }
-);
+  return respond(res, {
+    status: 200,
+    json: {
+      message: "Email sent successfully",
+      messageId,
+    },
+  });
+});
