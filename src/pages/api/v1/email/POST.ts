@@ -18,7 +18,11 @@ export default WithMiddleware(async function POST(req: NextApiRequest, res: Next
   const parsedForm = await new Promise<FormParseResult>((resolve, reject) =>
     form.parse(req, (err, valueFields, fileFields) => {
       if (err == null) return resolve({ valueFields, fileFields });
-      return reject(CustomApiError.create(400, "Invalid files recieved", err));
+      if (err instanceof Error) {
+        return reject(CustomApiError.create(400, `Bad Request: ${err.message}`, err));
+      } else {
+        return reject(CustomApiError.create(400, `Bad Request`, err));
+      }
     })
   );
 
