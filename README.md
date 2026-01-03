@@ -24,10 +24,38 @@ multipart/form-data
 | `to` | string (multiple) | Recipient email address(es). Add multiple times for multiple recipients. |
 | `from` | string | Sender email address |
 | `subject` | string | Email subject line |
-| `body` | string | Email content (HTML or plain text) |
 | `emailHost` | string | SMTP server hostname (e.g., `smtp.gmail.com`) |
 | `emailUser` | string | SMTP authentication username |
 | `emailPassword` | string | SMTP authentication password |
+
+### Body Fields
+| Field | Type | Description |
+|-------|------|-------------|
+| `body` | string | Email content (HTML or plain text) |
+| `isHtml` | string/boolean | Set to `"true"` for HTML body, `"false"` for plain text body. Required only if `body` is provided. |
+| `html` | string | Use instead of `body` and `isHtml`. Email content as HTML only. |
+| `text` | string | Use instead of `body` and `isHtml`. Email content as plain text only. |
+
+#### Email Content Options
+
+You have three ways to specify your email content:
+
+**Option 1: Using `body` and `isHtml`**
+- Provide `body` with your email content
+- Set `isHtml` to `"true"` for HTML emails or `"false"` for plain text
+- Both fields are required when using this approach
+
+**Option 2: Using `html` and/or `text` directly**
+- Use `html` for HTML content only
+- Use `text` for plain text content only  
+- You can provide both together to send a multi-part email (recommended for better compatibility)
+
+**Option 3: Combining both approaches**
+- Provide explicit `html` and/or `text` fields for precise control
+- Optionally include `body` and `isHtml` as fallback values
+- Explicit fields always take precedence over the `body` fallback
+
+**Note:** At least one content field (`body`, `html`, or `text`) must be provided.
 
 ### Optional Fields
 
@@ -35,7 +63,6 @@ multipart/form-data
 |-------|------|---------|-------------|
 | `cc` | string (multiple) | `[]` | CC email address(es). Add multiple times for multiple CCs. |
 | `bcc` | string (multiple) | `[]` | BCC email address(es). Add multiple times for multiple BCCs. |
-| `isHtml` | string/boolean | `false` | Set to `"true"` for HTML email, `"false"` for plain text |
 | `emailPort` | string | `"587"` | SMTP server port (use `"465"` for SSL, `"587"` for TLS) |
 | `file` | File (multiple) | `[]` | File attachment(s). Add multiple times for multiple attachments. |
 
@@ -64,8 +91,7 @@ public class EmailService {
         // Email details
         body.add("from", "Joh Doe <johndoe@example.com>");
         body.add("subject", "Hello World");
-        body.add("body", "<h1>Hello World</h1><p>This is a hello world email.</p>");
-        body.add("isHtml", "true");
+        body.add("html", "<h1>Hello World</h1><p>This is a hello world email.</p>");
 
         // SMTP credentials
         body.add("emailHost", "[HOST]");
@@ -115,8 +141,7 @@ export async function sendEmail(filePath) {
   // Email details
   formData.append("from", "Joh Doe <johndoe@example.com>");
   formData.append("subject", "Hello World");
-  formData.append("body", "<h1>Hello World</h1><p>This is a hello world email.</p>");
-  formData.append("isHtml", "true");
+  formData.append("html", "<h1>Hello World</h1><p>This is a hello world email.</p>");
 
   // SMTP credentials
   formData.append("emailHost", "[HOST]");
@@ -148,8 +173,7 @@ curl -X POST https://generic-email-service.vercel.app/api/v1/email \
   -F "to=bob@example.com" \
   -F "from=Joh Doe <johndoe@example.com>" \
   -F "subject=Hello World" \
-  -F "body=<h1>Hello World</h1><p>This is a hello world email.</p>" \
-  -F "isHtml=true" \
+  -F "html=<h1>Hello World</h1><p>This is a hello world email.</p>" \
   -F "emailHost=[HOST]" \
   -F "emailPort=[POST]" \
   -F "emailUser=[EMAIL_USER]" \

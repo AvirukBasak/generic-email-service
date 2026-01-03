@@ -10,7 +10,7 @@ import POST from "./POST";
 export { config } from "./POST";
 
 export default function (req: NextApiRequest, res: NextApiResponse): Promise<void> {
-  RequestValidationParser.parse({ req, method: [HttpMethodTypes.POST, HttpMethodTypes.GET] });
+  RequestValidationParser.parse({ req, method: HttpMethodTypes.POST });
   if (req.method === HttpMethodTypes.POST) {
     return POST(req, res);
   }
