@@ -1,0 +1,22 @@
+{
+  "storage": {
+    "rules": "firebase/storage.rules"
+  },
+  "emulators": {
+    "ui": {
+      "enabled": true,
+      "port": 9000
+    },
+    "storage": {
+      "port": 9003
+    },
+    "firestore": {
+      "port": 9004
+    },
+    "singleProjectMode": true
+  },
+  "firestore": {
+    "rules": "firebase/firestore.rules",
+    "indexes": "firebase/firestore.indexes.json"
+  }
+}

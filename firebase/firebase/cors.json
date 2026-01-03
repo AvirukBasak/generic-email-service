@@ -1,0 +1,8 @@
+[
+  {
+    "origin": ["https://memeboard-serverless.web.app"],
+    "method": ["GET", "POST", "PATCH", "DELETE"],
+    "maxAgeSeconds": 3600,
+    "responseHeader": ["Content-Type"]
+  }
+]
