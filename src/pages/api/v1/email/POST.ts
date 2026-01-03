@@ -13,7 +13,7 @@ export const config = { api: { bodyParser: false } };
 export default WithMiddleware(async function POST(req: NextApiRequest, res: NextApiResponse) {
   RequestValidationParser.parse({ req, method: HttpMethodTypes.POST });
 
-  const form = formidable({ multiples: true, keepExtensions: true, allowEmptyFiles: true });
+  const form = formidable({ multiples: true, keepExtensions: true, allowEmptyFiles: true, minFileSize: 0 });
 
   const parsedForm = await new Promise<FormParseResult>((resolve, reject) =>
     form.parse(req, (err, valueFields, fileFields) => {
