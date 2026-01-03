@@ -86,7 +86,7 @@ public class EmailService {
 
         // Send request
         ResponseEntity<String> response = restTemplate.postForEntity(
-                "http://generic-email-service.vercel.app/api/v1/email",
+                "https://generic-email-service.vercel.app/api/v1/email",
                 request,
                 String.class
         );
@@ -143,7 +143,7 @@ export async function sendEmail(filePath) {
 ## cURL Example
 
 ```bash
-curl -X POST http://generic-email-service.vercel.app/api/v1/email \
+curl -X POST https://generic-email-service.vercel.app/api/v1/email \
   -F "to=alice@example.com" \
   -F "to=bob@example.com" \
   -F "from=Joh Doe <johndoe@example.com>" \
