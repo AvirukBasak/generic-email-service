@@ -61,32 +61,32 @@ function parseEmailFormData(parsedForm: FormParseResult): EmailFormData {
 
   // Extract and validate required fields
   const from = valueFields["from"];
-  if (from == null || (Array.isArray(from) ? from.length === 0 : !from)) {
+  if (from == null || (Array.isArray(from) && from.length === 0)) {
     throw CustomApiError.create(400, "Missing 'from' field");
   }
 
   const subject = valueFields["subject"];
-  if (subject == null || (Array.isArray(subject) ? subject.length === 0 : !subject)) {
+  if (subject == null || (Array.isArray(subject) && subject.length === 0)) {
     throw CustomApiError.create(400, "Missing 'subject' field");
   }
 
   const body = valueFields["body"];
-  if (body == null || (Array.isArray(body) ? body.length === 0 : !body)) {
+  if (body == null || (Array.isArray(body) && body.length === 0)) {
     throw CustomApiError.create(400, "Missing 'body' field");
   }
 
   const emailHost = valueFields["emailHost"];
-  if (emailHost == null || (Array.isArray(emailHost) ? emailHost.length === 0 : !emailHost)) {
+  if (emailHost == null || (Array.isArray(emailHost) && emailHost.length === 0)) {
     throw CustomApiError.create(400, "Missing 'emailHost' field");
   }
 
   const emailUser = valueFields["emailUser"];
-  if (emailUser != null || (Array.isArray(emailUser) ? emailUser.length === 0 : !emailUser)) {
+  if (emailUser == null || (Array.isArray(emailUser) && emailUser.length === 0)) {
     throw CustomApiError.create(400, "Missing 'emailUser' field");
   }
 
   const emailPassword = valueFields["emailPassword"];
-  if (emailPassword == null || (Array.isArray(emailPassword) ? emailPassword.length === 0 : !emailPassword)) {
+  if (emailPassword == null || (Array.isArray(emailPassword) && emailPassword.length === 0)) {
     throw CustomApiError.create(400, "Missing 'emailPassword' field");
   }
 
