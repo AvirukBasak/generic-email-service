@@ -25,22 +25,24 @@ export interface EmailServerCreds {
 
 export class EmailService {
   static parseForm(parsedForm: FormParseResult): [EmailServerCreds, EmailData] {
+    console.log(parsedForm);
+
     const { valueFields, fileFields } = parsedForm;
 
     const emailHost = getValueField(valueFields["emailHost"]);
-    if (emailHost == null) {
+    if (emailHost == null || emailHost.length === 0) {
       throw CustomApiError.create(400, "Missing 'emailHost' field");
     }
 
     const emailUser = getValueField(valueFields["emailUser"]);
-    if (emailUser == null) {
+    if (emailUser == null || emailUser.length === 0) {
       throw CustomApiError.create(400, "Missing 'emailUser' field");
     }
 
     const emailPort = getValueField(valueFields["emailPort"]) ?? "587";
 
     const emailPassword = getValueField(valueFields["emailPassword"]);
-    if (emailPassword == null) {
+    if (emailPassword == null || emailPassword.length === 0) {
       throw CustomApiError.create(400, "Missing 'emailPassword' field");
     }
 
@@ -52,12 +54,12 @@ export class EmailService {
     };
 
     const from = getValueField(valueFields["from"]);
-    if (from == null) {
+    if (from == null || from.length === 0) {
       throw CustomApiError.create(400, "Missing 'from' field");
     }
 
     const subject = getValueField(valueFields["subject"]);
-    if (subject == null) {
+    if (subject == null || subject.length === 0) {
       throw CustomApiError.create(400, "Missing 'subject' field");
     }
 
@@ -72,8 +74,6 @@ export class EmailService {
 
     const html = getValueField(valueFields["html"]) ?? (isHtml ? body : null);
     const text = getValueField(valueFields["text"]) ?? (isHtml ? null : body);
-
-    console.log(isHtml, body, html, text);
 
     if (body == null && text == null && html == null) {
       throw CustomApiError.create(400, "Provide one of either 'body', 'text' or 'html' field");

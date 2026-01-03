@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
   /* config options here */
   logging: false,
   productionBrowserSourceMaps: true,
-  swcMinify: false,
+  // swcMinify: false,
 
   experimental: {
     externalDir: true,
