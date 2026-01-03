@@ -53,82 +53,44 @@ import java.io.File;
 
 public class EmailService {
     
-    public String sendEmail() {
+    public String sendEmail(String filePath) {
         RestTemplate restTemplate = new RestTemplate();
         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        
-        // Required: Recipients (multiple allowed)
-        body.add("to", "recipient1@example.com");
-        body.add("to", "recipient2@example.com");
-        
-        // Optional: CC and BCC (multiple allowed)
-        body.add("cc", "cc@example.com");
-        body.add("bcc", "bcc@example.com");
-        
-        // Required: Sender
-        body.add("from", "sender@example.com");
-        
-        // Required: Subject and Body
-        body.add("subject", "Test Email from Java");
-        body.add("body", "<h1>Hello!</h1><p>This is a test email with HTML content.</p>");
+
+        // Recipients
+        body.add("to", "alice@example.com");
+        body.add("to", "bob@example.com");
+
+        // Email details
+        body.add("from", "Joh Doe <johndoe@example.com>");
+        body.add("subject", "Hello World");
+        body.add("body", "<h1>Hello World</h1><p>This is a hello world email.</p>");
         body.add("isHtml", "true");
-        
-        // Required: SMTP Configuration
-        body.add("emailHost", "smtp.gmail.com");
-        body.add("emailPort", "587");
-        body.add("emailUser", "your-email@gmail.com");
-        body.add("emailPassword", "your-app-password");
-        
-        // Optional: Attachments (multiple allowed)
-        body.add("file", new FileSystemResource(new File("/path/to/document.pdf")));
-        body.add("file", new FileSystemResource(new File("/path/to/image.png")));
-        
+
+        // SMTP credentials
+        body.add("emailHost", "[HOST]");
+        body.add("emailPort", "[POST]");
+        body.add("emailUser", "[EMAIL_USER]");
+        body.add("emailPassword", "[EMAIL_PASSWORD]");
+
+        // Attachment
+        body.add("file", new FileSystemResource(new File(filePath)));
+
         // Set headers
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-        
+
         // Create request entity
         HttpEntity<MultiValueMap<String, Object>> request = 
                 new HttpEntity<>(body, headers);
-        
+
         // Send request
         ResponseEntity<String> response = restTemplate.postForEntity(
-                "https://yourdomain.com/api/v1/email",
+                "http://generic-email-service.vercel.app/api/v1/email",
                 request,
                 String.class
         );
-        
-        return response.getBody();
-    }
-    
-    // Plain text email example
-    public String sendPlainTextEmail() {
-        RestTemplate restTemplate = new RestTemplate();
-        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
-        
-        body.add("to", "recipient@example.com");
-        body.add("from", "sender@example.com");
-        body.add("subject", "Plain Text Email");
-        body.add("body", "This is a plain text email without HTML formatting.");
-        body.add("isHtml", "false");
-        
-        body.add("emailHost", "smtp.gmail.com");
-        body.add("emailPort", "587");
-        body.add("emailUser", "your-email@gmail.com");
-        body.add("emailPassword", "your-app-password");
-        
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
-        
-        HttpEntity<MultiValueMap<String, Object>> request = 
-                new HttpEntity<>(body, headers);
-        
-        ResponseEntity<String> response = restTemplate.postForEntity(
-                "https://yourdomain.com/api/send-email",
-                request,
-                String.class
-        );
-        
+
         return response.getBody();
     }
 }
@@ -139,37 +101,40 @@ public class EmailService {
 ## JavaScript/TypeScript Fetch Example
 
 ```typescript
-async function sendEmail() {
+import fs from "fs";
+import path from "path";
+import { lookup } from 'mime-types';
+
+export async function sendEmail(filePath) {
   const formData = new FormData();
-  
+
   // Recipients
-  formData.append("to", "recipient1@example.com");
-  formData.append("to", "recipient2@example.com");
-  formData.append("cc", "cc@example.com");
-  formData.append("bcc", "bcc@example.com");
-  
+  formData.append("to", "alice@example.com");
+  formData.append("to", "bob@example.com");
+
   // Email details
-  formData.append("from", "sender@example.com");
-  formData.append("subject", "Test Email");
-  formData.append("body", "<h1>Hello!</h1><p>HTML content</p>");
+  formData.append("from", "Joh Doe <johndoe@example.com>");
+  formData.append("subject", "Hello World");
+  formData.append("body", "<h1>Hello World</h1><p>This is a hello world email.</p>");
   formData.append("isHtml", "true");
-  
+
   // SMTP credentials
-  formData.append("emailHost", "smtp.gmail.com");
-  formData.append("emailPort", "587");
-  formData.append("emailUser", "your-email@gmail.com");
-  formData.append("emailPassword", "your-app-password");
-  
-  // Attachments
-  formData.append("file", fileObject1);
-  formData.append("file", fileObject2);
-  
-  const response = await fetch("https://yourdomain.com/api/send-email", {
+  formData.append("emailHost", "[HOST]");
+  formData.append("emailPort", "[POST]");
+  formData.append("emailUser", "[EMAIL_USER]");
+  formData.append("emailPassword", "[EMAIL_PASSWORD]");
+
+  // Attachments - read files from disk
+  const fileBuffer = fs.readFileSync(filePath);
+  const fileName = path.basename(filePath);
+  const mimeType = lookup(filePath) || 'application/octet-stream';
+  const blob = new Blob([fileBuffer], { type: mimeType });
+  formData.append("file", blob, fileName);
+
+  return fetch("https://generic-email-service.vercel.app/api/v1/email", {
     method: "POST",
     body: formData,
   });
-  
-  return await response.json();
 }
 ```
 
@@ -178,21 +143,18 @@ async function sendEmail() {
 ## cURL Example
 
 ```bash
-curl -X POST https://yourdomain.com/api/send-email \
-  -F "to=recipient1@example.com" \
-  -F "to=recipient2@example.com" \
-  -F "cc=cc@example.com" \
-  -F "bcc=bcc@example.com" \
-  -F "from=sender@example.com" \
-  -F "subject=Test Email" \
-  -F "body=<h1>Hello!</h1><p>This is HTML content</p>" \
+curl -X POST http://generic-email-service.vercel.app/api/v1/email \
+  -F "to=alice@example.com" \
+  -F "to=bob@example.com" \
+  -F "from=Joh Doe <johndoe@example.com>" \
+  -F "subject=Hello World" \
+  -F "body=<h1>Hello World</h1><p>This is a hello world email.</p>" \
   -F "isHtml=true" \
-  -F "emailHost=smtp.gmail.com" \
-  -F "emailPort=587" \
-  -F "emailUser=your-email@gmail.com" \
-  -F "emailPassword=your-app-password" \
-  -F "file=@/path/to/document.pdf" \
-  -F "file=@/path/to/image.png"
+  -F "emailHost=[HOST]" \
+  -F "emailPort=[POST]" \
+  -F "emailUser=[EMAIL_USER]" \
+  -F "emailPassword=[EMAIL_PASSWORD]" \
+  -F "file=@/path/to/your/file"
 ```
 
 ---

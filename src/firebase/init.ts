@@ -2,7 +2,6 @@ import * as config from "@/config/env";
 import * as admin from "firebase-admin";
 import { App, getApp, getApps, initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
-import { getDatabase } from "firebase-admin/database";
 import { DocumentReference, getFirestore } from "firebase-admin/firestore";
 import { getStorage } from "firebase-admin/storage";
 import { Nullable } from "@/types";
@@ -22,7 +21,6 @@ if (!getApps().some((app) => app.name === config.FIREBASE_PROJECT_ID)) {
 }
 
 const FirebaseAuth = getAuth(FirebaseApp);
-const FirebaseRtDb = getDatabase(FirebaseApp);
 const FirebaseFirestore = getFirestore(FirebaseApp);
 const FirebaseStorage = getStorage(FirebaseApp);
 
@@ -53,4 +51,4 @@ class StoragePaths {
   };
 }
 
-export { FirebaseApp, FirebaseAuth, FirebaseRtDb, FirebaseFirestore, FirebaseStorage, FirestorePaths, StoragePaths };
+export { FirebaseApp, FirebaseAuth, FirebaseFirestore, FirebaseStorage, FirestorePaths, StoragePaths };
