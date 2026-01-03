@@ -1,5 +1,5 @@
 {
   "projects": {
-    "default": "memeboard-serverless"
+    "default": "generic-email-service"
   }
 }

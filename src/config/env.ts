@@ -12,7 +12,7 @@ if (process.env["FIREBASE_SERVICE_ACCOUNT_KEY"] == null) throw new Error(".env F
 if (process.env["CUSTOM_FIRESTORE_INDEX_ADMIN_SERVICE_ACCOUNT_KEY"] == null) throw Error(".env CUSTOM_FIRESTORE_INDEX_ADMIN_SERVICE_ACCOUNT_KEY undefined"); // prettier-ignore
 
 export const FIREBASE_PROJECT_ID =
-  process.env["FIREBASE_PROJECT_ID"].length == 0 ? "memeboard-serverless" : process.env["FIREBASE_PROJECT_ID"];
+  process.env["FIREBASE_PROJECT_ID"].length == 0 ? "generic-email-service" : process.env["FIREBASE_PROJECT_ID"];
 
 // vercel provide env info
 export const VERCEL_ENV = process.env["VERCEL_ENV"] ?? "development";

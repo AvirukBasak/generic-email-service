@@ -4,6 +4,8 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   logging: false,
+  productionBrowserSourceMaps: true,
+  swcMinify: false,
 
   experimental: {
     externalDir: true,
