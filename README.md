@@ -1,4 +1,305 @@
-# MemeBoard Server - Documentation
+# Email API Documentation
+
+## Endpoint
+```
+POST /api/v1/email
+```
+
+## Description
+Send emails with support for multiple recipients, CC, BCC, attachments, and custom SMTP configuration.
+
+## Content Type
+```
+multipart/form-data
+```
+
+---
+
+## Request Parameters
+
+### Required Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `to` | string (multiple) | Recipient email address(es). Add multiple times for multiple recipients. |
+| `from` | string | Sender email address |
+| `subject` | string | Email subject line |
+| `body` | string | Email content (HTML or plain text) |
+| `emailHost` | string | SMTP server hostname (e.g., `smtp.gmail.com`) |
+| `emailUser` | string | SMTP authentication username |
+| `emailPassword` | string | SMTP authentication password |
+
+### Optional Fields
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `cc` | string (multiple) | `[]` | CC email address(es). Add multiple times for multiple CCs. |
+| `bcc` | string (multiple) | `[]` | BCC email address(es). Add multiple times for multiple BCCs. |
+| `isHtml` | string/boolean | `false` | Set to `"true"` for HTML email, `"false"` for plain text |
+| `emailPort` | string | `"587"` | SMTP server port (use `"465"` for SSL, `"587"` for TLS) |
+| `file` | File (multiple) | `[]` | File attachment(s). Add multiple times for multiple attachments. |
+
+---
+
+## Java Spring RestTemplate Example
+
+```java
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.*;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
+import java.io.File;
+
+public class EmailService {
+    
+    public String sendEmail() {
+        RestTemplate restTemplate = new RestTemplate();
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        
+        // Required: Recipients (multiple allowed)
+        body.add("to", "recipient1@example.com");
+        body.add("to", "recipient2@example.com");
+        
+        // Optional: CC and BCC (multiple allowed)
+        body.add("cc", "cc@example.com");
+        body.add("bcc", "bcc@example.com");
+        
+        // Required: Sender
+        body.add("from", "sender@example.com");
+        
+        // Required: Subject and Body
+        body.add("subject", "Test Email from Java");
+        body.add("body", "<h1>Hello!</h1><p>This is a test email with HTML content.</p>");
+        body.add("isHtml", "true");
+        
+        // Required: SMTP Configuration
+        body.add("emailHost", "smtp.gmail.com");
+        body.add("emailPort", "587");
+        body.add("emailUser", "your-email@gmail.com");
+        body.add("emailPassword", "your-app-password");
+        
+        // Optional: Attachments (multiple allowed)
+        body.add("file", new FileSystemResource(new File("/path/to/document.pdf")));
+        body.add("file", new FileSystemResource(new File("/path/to/image.png")));
+        
+        // Set headers
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        
+        // Create request entity
+        HttpEntity<MultiValueMap<String, Object>> request = 
+                new HttpEntity<>(body, headers);
+        
+        // Send request
+        ResponseEntity<String> response = restTemplate.postForEntity(
+                "https://yourdomain.com/api/v1/email",
+                request,
+                String.class
+        );
+        
+        return response.getBody();
+    }
+    
+    // Plain text email example
+    public String sendPlainTextEmail() {
+        RestTemplate restTemplate = new RestTemplate();
+        MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+        
+        body.add("to", "recipient@example.com");
+        body.add("from", "sender@example.com");
+        body.add("subject", "Plain Text Email");
+        body.add("body", "This is a plain text email without HTML formatting.");
+        body.add("isHtml", "false");
+        
+        body.add("emailHost", "smtp.gmail.com");
+        body.add("emailPort", "587");
+        body.add("emailUser", "your-email@gmail.com");
+        body.add("emailPassword", "your-app-password");
+        
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+        
+        HttpEntity<MultiValueMap<String, Object>> request = 
+                new HttpEntity<>(body, headers);
+        
+        ResponseEntity<String> response = restTemplate.postForEntity(
+                "https://yourdomain.com/api/send-email",
+                request,
+                String.class
+        );
+        
+        return response.getBody();
+    }
+}
+```
+
+---
+
+## JavaScript/TypeScript Fetch Example
+
+```typescript
+async function sendEmail() {
+  const formData = new FormData();
+  
+  // Recipients
+  formData.append("to", "recipient1@example.com");
+  formData.append("to", "recipient2@example.com");
+  formData.append("cc", "cc@example.com");
+  formData.append("bcc", "bcc@example.com");
+  
+  // Email details
+  formData.append("from", "sender@example.com");
+  formData.append("subject", "Test Email");
+  formData.append("body", "<h1>Hello!</h1><p>HTML content</p>");
+  formData.append("isHtml", "true");
+  
+  // SMTP credentials
+  formData.append("emailHost", "smtp.gmail.com");
+  formData.append("emailPort", "587");
+  formData.append("emailUser", "your-email@gmail.com");
+  formData.append("emailPassword", "your-app-password");
+  
+  // Attachments
+  formData.append("file", fileObject1);
+  formData.append("file", fileObject2);
+  
+  const response = await fetch("https://yourdomain.com/api/send-email", {
+    method: "POST",
+    body: formData,
+  });
+  
+  return await response.json();
+}
+```
+
+---
+
+## cURL Example
+
+```bash
+curl -X POST https://yourdomain.com/api/send-email \
+  -F "to=recipient1@example.com" \
+  -F "to=recipient2@example.com" \
+  -F "cc=cc@example.com" \
+  -F "bcc=bcc@example.com" \
+  -F "from=sender@example.com" \
+  -F "subject=Test Email" \
+  -F "body=<h1>Hello!</h1><p>This is HTML content</p>" \
+  -F "isHtml=true" \
+  -F "emailHost=smtp.gmail.com" \
+  -F "emailPort=587" \
+  -F "emailUser=your-email@gmail.com" \
+  -F "emailPassword=your-app-password" \
+  -F "file=@/path/to/document.pdf" \
+  -F "file=@/path/to/image.png"
+```
+
+---
+
+## Response Format
+
+### Success Response (200 OK)
+```json
+{
+  "message": "Email sent successfully",
+  "messageId": "<unique-message-id@smtp-server>"
+}
+```
+
+### Error Response (400 Bad Request)
+```json
+{
+  "error": "Missing 'from' field"
+}
+```
+
+### Error Response (500 Internal Server Error)
+```json
+{
+  "error": "Failed to send email"
+}
+```
+
+---
+
+## Common SMTP Configurations
+
+### Gmail
+```
+emailHost: smtp.gmail.com
+emailPort: 587
+emailUser: your-email@gmail.com
+emailPassword: your-app-password (not regular password!)
+```
+**Note:** Enable 2FA and generate an App Password from Google Account settings.
+
+### Outlook/Office 365
+```
+emailHost: smtp.office365.com
+emailPort: 587
+emailUser: your-email@outlook.com
+emailPassword: your-password
+```
+
+### Yahoo Mail
+```
+emailHost: smtp.mail.yahoo.com
+emailPort: 587
+emailUser: your-email@yahoo.com
+emailPassword: your-app-password
+```
+
+### Custom SMTP Server
+```
+emailHost: mail.yourdomain.com
+emailPort: 587 (or 465 for SSL)
+emailUser: your-username
+emailPassword: your-password
+```
+
+---
+
+## Important Notes
+
+1. **App Passwords**: For Gmail and other providers with 2FA, use app-specific passwords instead of your regular password.
+
+2. **Multiple Values**: To add multiple recipients, CC, BCC, or files, add the same field name multiple times:
+   ```java
+   body.add("to", "email1@example.com");
+   body.add("to", "email2@example.com");
+   body.add("to", "email3@example.com");
+   ```
+
+3. **HTML vs Plain Text**: Set `isHtml` to `"true"` for HTML emails, `"false"` for plain text.
+
+4. **Port Selection**:
+   - Port `587`: TLS/STARTTLS (recommended)
+   - Port `465`: SSL (older, but still supported)
+   - Port `25`: Usually blocked by ISPs
+
+5. **File Attachments**: All common file types are supported. Multiple attachments can be added by using the `file` field multiple times.
+
+6. **Security**: Since this API accepts SMTP credentials, ensure:
+   - The API endpoint is served over HTTPS
+   - Credentials are not logged or stored
+   - Consider implementing authentication/authorization on the API endpoint itself
+
+---
+
+## Error Handling
+
+The API will return appropriate HTTP status codes:
+
+- `200`: Email sent successfully
+- `400`: Bad request (missing required fields, invalid data)
+- `500`: Server error (SMTP connection failed, file upload issues)
+
+Always check the response status and handle errors appropriately in your applicati
+
+---
+
+# Generic Email Service - Documentation
 
 - _Error Handling_: All error responses have an HTTP status code and a JSON body `{ message: string }`, which should be displayed directly to the user.
 - _Pagination_: Endpoints supporting query-based listing (e.g., `readListOnQuery`) expect query parameters like `perPageLimit`, `currentPage`, `sortOn`, and `sortOrder`.

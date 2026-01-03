@@ -148,7 +148,7 @@ async function sendEmail(data: EmailFormData): Promise<string> {
 
     // Prepare attachments for nodemailer
     const attachments = data.attachments.map((file) => ({
-      filename: file.originalFilename || file.newFilename,
+      filename: file.originalFilename ?? file.newFilename,
       path: file.filepath,
     }));
 
@@ -165,28 +165,16 @@ async function sendEmail(data: EmailFormData): Promise<string> {
 
     // Send email
     const info = await transporter.sendMail(mailOptions);
-
-    // Clean up temporary files
+    return info.messageId;
+  } catch (err) {
+    throw CustomApiError.create(500, "Failed to send email", err);
+  } finally {
+    // Clean up files even on error
     data.attachments.forEach((file) => {
       fs.unlink(file.filepath, (err) => {
         if (err) console.error("Error deleting temp file:", err);
       });
     });
-
-    return info.messageId;
-  } catch (err) {
-    // Clean up files even on error
-    data.attachments.forEach((file) => {
-      fs.unlink(file.filepath, (unlinkErr) => {
-        if (unlinkErr) console.error("Error deleting temp file:", unlinkErr);
-      });
-    });
-
-    throw CustomApiError.create(
-      500,
-      "Failed to send email",
-      err instanceof Error ? err : String(err)
-    );
   }
 }
 
