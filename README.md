@@ -129,6 +129,8 @@ curl -X POST https://generic-email-service.vercel.app/api/v1/email \
 
 ## Response Format
 
+The following are a few examples.
+
 ### Success Response (200 OK)
 ```json
 {
@@ -140,14 +142,16 @@ curl -X POST https://generic-email-service.vercel.app/api/v1/email \
 ### Error Response (400 Bad Request)
 ```json
 {
-  "error": "Missing 'from' field"
+  "status": 400,
+  "message": "Missing 'from' field"
 }
 ```
 
 ### Error Response (500 Internal Server Error)
 ```json
 {
-  "error": "Failed to send email"
+  "status": 500,
+  "message": "Failed to send email"
 }
 ```
 
