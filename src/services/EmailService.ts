@@ -25,8 +25,6 @@ export interface EmailServerCreds {
 
 export class EmailService {
   static parseForm(parsedForm: FormParseResult): [EmailServerCreds, EmailData] {
-    console.log(parsedForm);
-
     const { valueFields, fileFields } = parsedForm;
 
     const emailHost = getValueField(valueFields["emailHost"]);
@@ -113,40 +111,53 @@ export class EmailService {
   }
 
   static async sendEmail(creds: EmailServerCreds, data: EmailData): Promise<string> {
+    console.log(data);
+  
+    // Create transporter with provided credentials
+    const transporter = nodemailer.createTransport({
+      host: creds.host,
+      port: parseInt(creds.port),
+      secure: creds.port === "465",
+      auth: {
+        user: creds.user,
+        pass: creds.password,
+      },
+      connectionTimeout: 10_000, // time to establish TCP connection
+      greetingTimeout: 10_000,   // time to wait for SMTP greeting
+      socketTimeout: 10_000,     // inactivity timeout
+    });
+
+    // Prepare attachments for nodemailer
+    const attachments = data.attachments.map((file) => ({
+      filename: file.originalFilename ?? file.newFilename,
+      path: file.filepath,
+    }));
+
+    // Prepare email options
+    const mailOptions = {
+      from: data.from,
+      to: data.to.join(", "),
+      cc: data.cc.length > 0 ? data.cc.join(", ") : void 0,
+      bcc: data.bcc.length > 0 ? data.bcc.join(", ") : void 0,
+      subject: data.subject,
+      html: data.html ?? void 0,
+      text: data.text ?? void 0,
+      attachments: attachments.length > 0 ? attachments : void 0,
+    };
+
     try {
-      // Create transporter with provided credentials
-      const transporter = nodemailer.createTransport({
-        host: creds.host,
-        port: parseInt(creds.port),
-        secure: creds.port === "465",
-        auth: {
-          user: creds.user,
-          pass: creds.password,
-        },
-      });
-
-      // Prepare attachments for nodemailer
-      const attachments = data.attachments.map((file) => ({
-        filename: file.originalFilename ?? file.newFilename,
-        path: file.filepath,
-      }));
-
-      // Prepare email options
-      const mailOptions = {
-        from: data.from,
-        to: data.to.join(", "),
-        cc: data.cc.length > 0 ? data.cc.join(", ") : void 0,
-        bcc: data.bcc.length > 0 ? data.bcc.join(", ") : void 0,
-        subject: data.subject,
-        html: data.html ?? void 0,
-        text: data.text ?? void 0,
-        attachments: attachments.length > 0 ? attachments : void 0,
-      };
-
-      const { messageId } = await transporter.sendMail(mailOptions);
-      return messageId;
-    } catch (err) {
-      throw CustomApiError.create(500, "Failed to send email", err);
+      try {
+        await transporter.verify();
+      } catch (err) {
+        throw CustomApiError.create(401, "Email auth failure", err);
+      }
+      
+      try {
+        const { messageId } = await transporter.sendMail(mailOptions);
+        return messageId;
+      } catch (err) {
+        throw CustomApiError.create(500, "Failed to send email", err);
+      }
     } finally {
       // Clean up files even on error
       data.attachments.forEach((file) => {
